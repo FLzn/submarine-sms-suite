@@ -1,0 +1,176 @@
+import { useState, useEffect } from "react";
+import { smsLogsApi, ApiSmsLog, SmsLogFilters } from "@/lib/api";
+import { PageHeader } from "@/components/PageHeader";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, Filter } from "lucide-react";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
+export default function DashboardPage() {
+  const [logs, setLogs] = useState<ApiSmsLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<SmsLogFilters>({});
+  const [tempFilters, setTempFilters] = useState<SmsLogFilters>({});
+
+  const fetchLogs = async (f?: SmsLogFilters) => {
+    try {
+      setLoading(true);
+      const data = await smsLogsApi.list(f || filters);
+      setLogs(data);
+    } catch (err: any) {
+      toast.error("Erro ao carregar logs: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const applyFilters = () => {
+    setFilters(tempFilters);
+    fetchLogs(tempFilters);
+  };
+
+  const clearFilters = () => {
+    setTempFilters({});
+    setFilters({});
+    fetchLogs({});
+  };
+
+  const successCount = logs.filter((l) => l.status === 0).length;
+  const errorCount = logs.filter((l) => l.status !== 0).length;
+
+  return (
+    <div>
+      <PageHeader title="Dashboard" description="Logs de envio de SMS" />
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="glass-card p-4 text-center">
+          <p className="text-2xl font-bold text-foreground">{logs.length}</p>
+          <p className="text-sm text-muted-foreground">Total de SMS</p>
+        </div>
+        <div className="glass-card p-4 text-center">
+          <p className="text-2xl font-bold text-success">{successCount}</p>
+          <p className="text-sm text-muted-foreground">Enviados com sucesso</p>
+        </div>
+        <div className="glass-card p-4 text-center">
+          <p className="text-2xl font-bold text-destructive">{errorCount}</p>
+          <p className="text-sm text-muted-foreground">Com erro</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="glass-card p-4 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-foreground">Filtros</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Data início</Label>
+            <Input
+              type="date"
+              value={tempFilters.startDate || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, startDate: e.target.value || undefined })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Data fim</Label>
+            <Input
+              type="date"
+              value={tempFilters.endDate || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, endDate: e.target.value || undefined })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">ID Campanha</Label>
+            <Input
+              type="number"
+              placeholder="Ex: 1"
+              value={tempFilters.campanhaId || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, campanhaId: e.target.value ? Number(e.target.value) : undefined })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">ID Cliente</Label>
+            <Input
+              type="number"
+              placeholder="Ex: 2"
+              value={tempFilters.clienteId || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, clienteId: e.target.value ? Number(e.target.value) : undefined })}
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 mt-3">
+          <Button size="sm" onClick={applyFilters}>
+            <Search className="w-3 h-3 mr-1" /> Buscar
+          </Button>
+          <Button size="sm" variant="secondary" onClick={clearFilters}>Limpar</Button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="glass-card overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="text-muted-foreground">ID</TableHead>
+                <TableHead className="text-muted-foreground">Campanha</TableHead>
+                <TableHead className="text-muted-foreground">Cliente</TableHead>
+                <TableHead className="text-muted-foreground">Telefone</TableHead>
+                <TableHead className="text-muted-foreground">Mensagem</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-muted-foreground">Enviado em</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {logs.map((log) => (
+                <TableRow key={log.id} className="border-border/30">
+                  <TableCell className="font-mono text-xs text-muted-foreground">{log.id}</TableCell>
+                  <TableCell>{log.campanha?.descricao || "—"}</TableCell>
+                  <TableCell>{log.campanha?.cliente?.nome || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs">{log.phone_number}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{log.message}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        log.status === 0
+                          ? "border-success/40 bg-success/10 text-success"
+                          : "border-destructive/40 bg-destructive/10 text-destructive"
+                      }
+                    >
+                      {log.status === 0 ? "Ok" : log.status_description || `Erro ${log.status}`}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {log.sent_at ? format(new Date(log.sent_at), "dd/MM/yyyy HH:mm") : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {logs.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                    Nenhum log encontrado
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
+  );
+}
