@@ -69,7 +69,11 @@ export default function CampanhasPage() {
                 <TableCell className="font-medium">{c.descricao}</TableCell>
                 <TableCell>R$ {c.valorSms.toFixed(2)}</TableCell>
                 <TableCell className="font-mono text-xs">{c.token}</TableCell>
-                <TableCell><StatusBadge ativo={c.ativo} /></TableCell>
+                <TableCell>
+                  <button onClick={() => campanhas.update(c.id, { ativo: !c.ativo })} className="cursor-pointer">
+                    <StatusBadge ativo={c.ativo} />
+                  </button>
+                </TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(c)} className="hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>

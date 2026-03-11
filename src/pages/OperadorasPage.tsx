@@ -73,7 +73,20 @@ export default function OperadorasPage() {
                 <TableCell className="font-mono text-xs text-muted-foreground">{o.id}</TableCell>
                 <TableCell className="font-medium">{o.nome}</TableCell>
                 <TableCell className="font-mono text-xs">{o.endpointSms}</TableCell>
-                <TableCell><StatusBadge ativo={o.ativo} /></TableCell>
+                <TableCell>
+                  <button onClick={() => {
+                    const newAtivo = !o.ativo;
+                    if (newAtivo) {
+                      operadoras.items.forEach((op) => {
+                        if (op.id !== o.id && op.ativo) operadoras.update(op.id, { ativo: false });
+                      });
+                      toast.info("Apenas uma operadora pode estar ativa por vez. As demais foram desativadas.");
+                    }
+                    operadoras.update(o.id, { ativo: newAtivo });
+                  }} className="cursor-pointer">
+                    <StatusBadge ativo={o.ativo} />
+                  </button>
+                </TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(o)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(o)} className="hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
