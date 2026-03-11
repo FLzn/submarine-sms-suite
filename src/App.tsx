@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import AppLayout from "@/components/AppLayout";
 import LoginPage from "@/pages/LoginPage";
+import DashboardPage from "@/pages/DashboardPage";
 import ClientesPage from "@/pages/ClientesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
 import OperadorasPage from "@/pages/OperadorasPage";
@@ -22,11 +23,12 @@ function ProtectedRoutes() {
     <DataProvider>
       <AppLayout>
         <Routes>
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/campanhas" element={<CampanhasPage />} />
           <Route path="/operadoras" element={<OperadorasPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
-          <Route path="/" element={<Navigate to="/clientes" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppLayout>

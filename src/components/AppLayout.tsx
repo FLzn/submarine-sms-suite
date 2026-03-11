@@ -1,11 +1,12 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X } from "lucide-react";
+import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const navItems = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/campanhas", label: "Campanhas", icon: Megaphone },
   { to: "/operadoras", label: "Operadoras", icon: Radio },

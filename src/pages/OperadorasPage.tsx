@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useData } from "@/contexts/DataContext";
-import { Operadora } from "@/hooks/useMockData";
+import { ApiOperadora } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -10,47 +10,73 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function OperadorasPage() {
   const { operadoras } = useData();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Operadora | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Operadora | null>(null);
+  const [editing, setEditing] = useState<ApiOperadora | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ApiOperadora | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ nome: "", endpointSms: "", ativo: true });
+  const [form, setForm] = useState({ nome: "", endpoint_sms: "", status: "on" as "on" | "off" });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ nome: "", endpointSms: "", ativo: true });
+    setForm({ nome: "", endpoint_sms: "", status: "on" });
     setDialogOpen(true);
   };
 
-  const openEdit = (o: Operadora) => {
+  const openEdit = (o: ApiOperadora) => {
     setEditing(o);
-    setForm({ nome: o.nome, endpointSms: o.endpointSms, ativo: o.ativo });
+    setForm({ nome: o.nome, endpoint_sms: o.endpoint_sms, status: o.status });
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    // If activating this one, deactivate all others
-    if (form.ativo) {
-      operadoras.items.forEach((o) => {
-        if (o.id !== editing?.id && o.ativo) {
-          operadoras.update(o.id, { ativo: false });
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (form.status === "on") {
+        // Deactivate all others first
+        for (const o of operadoras.items) {
+          if (o.id !== editing?.id && o.status === "on") {
+            await operadoras.update(o.id, { status: "off" });
+          }
         }
-      });
-      toast.info("Apenas uma operadora pode estar ativa por vez. As demais foram desativadas.");
+        toast.info("Apenas uma operadora pode estar ativa por vez.");
+      }
+      if (editing) {
+        await operadoras.update(editing.id, form);
+      } else {
+        await operadoras.add(form);
+      }
+      setDialogOpen(false);
+    } catch {} finally {
+      setSaving(false);
     }
-
-    if (editing) {
-      operadoras.update(editing.id, form);
-    } else {
-      operadoras.add(form);
-    }
-    setDialogOpen(false);
   };
+
+  const toggleStatus = async (o: ApiOperadora) => {
+    const newStatus = o.status === "on" ? "off" : "on";
+    if (newStatus === "on") {
+      for (const op of operadoras.items) {
+        if (op.id !== o.id && op.status === "on") {
+          await operadoras.update(op.id, { status: "off" });
+        }
+      }
+      toast.info("Apenas uma operadora pode estar ativa por vez.");
+    }
+    await operadoras.update(o.id, { status: newStatus });
+  };
+
+  if (operadoras.loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -72,19 +98,10 @@ export default function OperadorasPage() {
               <TableRow key={o.id} className="border-border/30">
                 <TableCell className="font-mono text-xs text-muted-foreground">{o.id}</TableCell>
                 <TableCell className="font-medium">{o.nome}</TableCell>
-                <TableCell className="font-mono text-xs">{o.endpointSms}</TableCell>
+                <TableCell className="font-mono text-xs">{o.endpoint_sms}</TableCell>
                 <TableCell>
-                  <button onClick={() => {
-                    const newAtivo = !o.ativo;
-                    if (newAtivo) {
-                      operadoras.items.forEach((op) => {
-                        if (op.id !== o.id && op.ativo) operadoras.update(op.id, { ativo: false });
-                      });
-                      toast.info("Apenas uma operadora pode estar ativa por vez. As demais foram desativadas.");
-                    }
-                    operadoras.update(o.id, { ativo: newAtivo });
-                  }} className="cursor-pointer">
-                    <StatusBadge ativo={o.ativo} />
+                  <button onClick={() => toggleStatus(o)} className="cursor-pointer">
+                    <StatusBadge ativo={o.status === "on"} />
                   </button>
                 </TableCell>
                 <TableCell className="text-right space-x-1">
@@ -109,16 +126,16 @@ export default function OperadorasPage() {
             </div>
             <div className="space-y-2">
               <Label>Endpoint SMS</Label>
-              <Input value={form.endpointSms} onChange={(e) => setForm({ ...form, endpointSms: e.target.value })} placeholder="https://api.operadora.com/sms" />
+              <Input value={form.endpoint_sms} onChange={(e) => setForm({ ...form, endpoint_sms: e.target.value })} placeholder="https://api.operadora.com/sms" />
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} />
+              <Switch checked={form.status === "on"} onCheckedChange={(v) => setForm({ ...form, status: v ? "on" : "off" })} />
               <Label>Ativo</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -126,7 +143,7 @@ export default function OperadorasPage() {
       <ConfirmDelete
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
-        onConfirm={() => { if (deleteTarget) operadoras.remove(deleteTarget.id); setDeleteTarget(null); }}
+        onConfirm={async () => { if (deleteTarget) await operadoras.remove(deleteTarget.id); setDeleteTarget(null); }}
         itemName={deleteTarget?.nome || ""}
       />
     </div>
