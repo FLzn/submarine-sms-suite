@@ -21,11 +21,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     if (!email || !password) throw new Error("Preencha todos os campos");
     const { access_token } = await apiLogin(email, password);
-    const mockUser = { email, username: email.split("@")[0] };
+    let userData: { email: string; username: string };
+    try {
+      const payload = JSON.parse(atob(access_token.split(".")[1]));
+      userData = { email: payload.email || email, username: payload.username || email.split("@")[0] };
+    } catch {
+      userData = { email, username: email.split("@")[0] };
+    }
     localStorage.setItem("submarine_token", access_token);
-    localStorage.setItem("submarine_user", JSON.stringify(mockUser));
+    localStorage.setItem("submarine_user", JSON.stringify(userData));
     setToken(access_token);
-    setUser(mockUser);
+    setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
