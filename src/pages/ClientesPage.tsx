@@ -62,7 +62,12 @@ export default function ClientesPage() {
                 <TableCell className="font-mono text-xs text-muted-foreground">{c.id}</TableCell>
                 <TableCell>{c.cnpjCpf}</TableCell>
                 <TableCell className="font-medium">{c.nome}</TableCell>
-                <TableCell><StatusBadge ativo={c.ativo} /></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={c.ativo} onCheckedChange={(v) => clientes.update(c.id, { ativo: v })} />
+                    <StatusBadge ativo={c.ativo} />
+                  </div>
+                </TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(c)} className="hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
