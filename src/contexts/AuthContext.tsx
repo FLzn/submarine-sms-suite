@@ -21,12 +21,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     if (!email || !password) throw new Error("Preencha todos os campos");
     const { access_token } = await apiLogin(email, password);
-    // Decode JWT payload to get real username
+    let userData: { email: string; username: string };
     try {
       const payload = JSON.parse(atob(access_token.split(".")[1]));
-      var userData = { email: payload.email || email, username: payload.username || email.split("@")[0] };
+      userData = { email: payload.email || email, username: payload.username || email.split("@")[0] };
     } catch {
-      var userData = { email, username: email.split("@")[0] };
+      userData = { email, username: email.split("@")[0] };
     }
     localStorage.setItem("submarine_token", access_token);
     localStorage.setItem("submarine_user", JSON.stringify(userData));
