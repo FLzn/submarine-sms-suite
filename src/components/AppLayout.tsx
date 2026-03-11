@@ -60,7 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
+            <span className="text-xs text-muted-foreground truncate">{user?.username}</span>
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground hover:text-destructive">
               <LogOut className="w-4 h-4" />
             </Button>
