@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-interface PageHeaderProps {
+export interface PageHeaderProps {
   title: string;
   description: string;
-  onAdd: () => void;
-  addLabel: string;
+  onAdd?: () => void;
+  addLabel?: string;
 }
 
 export function PageHeader({ title, description, onAdd, addLabel }: PageHeaderProps) {
