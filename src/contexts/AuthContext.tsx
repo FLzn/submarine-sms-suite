@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { apiLogin } from "@/lib/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -18,13 +19,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const login = useCallback(async (email: string, password: string) => {
-    // Mock authentication
     if (!email || !password) throw new Error("Preencha todos os campos");
-    const mockToken = btoa(`${email}:${Date.now()}`);
+    const { access_token } = await apiLogin(email, password);
     const mockUser = { email, username: email.split("@")[0] };
-    localStorage.setItem("submarine_token", mockToken);
+    localStorage.setItem("submarine_token", access_token);
     localStorage.setItem("submarine_user", JSON.stringify(mockUser));
-    setToken(mockToken);
+    setToken(access_token);
     setUser(mockUser);
   }, []);
 
