@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useData } from "@/contexts/DataContext";
-import { Campanha } from "@/hooks/useMockData";
+import { ApiCampanha } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -11,38 +11,56 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 
 export default function CampanhasPage() {
   const { campanhas, clientes } = useData();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Campanha | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Campanha | null>(null);
+  const [editing, setEditing] = useState<ApiCampanha | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ApiCampanha | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ clienteId: 0, descricao: "", valorSms: 0, token: "", ativo: true });
+  const [form, setForm] = useState({ cliente_id: 0, descricao: "", valor_sms: "", token: "", status: "on" as "on" | "off" });
 
   const getClienteName = (id: number) => clientes.items.find((c) => c.id === id)?.nome || "—";
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ clienteId: clientes.items[0]?.id || 0, descricao: "", valorSms: 0, token: "", ativo: true });
+    setForm({ cliente_id: clientes.items[0]?.id || 0, descricao: "", valor_sms: "", token: "", status: "on" });
     setDialogOpen(true);
   };
 
-  const openEdit = (c: Campanha) => {
+  const openEdit = (c: ApiCampanha) => {
     setEditing(c);
-    setForm({ clienteId: c.clienteId, descricao: c.descricao, valorSms: c.valorSms, token: c.token, ativo: c.ativo });
+    setForm({ cliente_id: c.cliente_id, descricao: c.descricao, valor_sms: c.valor_sms, token: c.token, status: c.status });
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    if (editing) {
-      campanhas.update(editing.id, form);
-    } else {
-      campanhas.add(form);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (editing) {
+        await campanhas.update(editing.id, form);
+      } else {
+        await campanhas.add(form);
+      }
+      setDialogOpen(false);
+    } catch {} finally {
+      setSaving(false);
     }
-    setDialogOpen(false);
   };
+
+  const toggleStatus = async (c: ApiCampanha) => {
+    await campanhas.update(c.id, { status: c.status === "on" ? "off" : "on" });
+  };
+
+  if (campanhas.loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -65,13 +83,13 @@ export default function CampanhasPage() {
             {campanhas.items.map((c) => (
               <TableRow key={c.id} className="border-border/30">
                 <TableCell className="font-mono text-xs text-muted-foreground">{c.id}</TableCell>
-                <TableCell>{getClienteName(c.clienteId)}</TableCell>
+                <TableCell>{getClienteName(c.cliente_id)}</TableCell>
                 <TableCell className="font-medium">{c.descricao}</TableCell>
-                <TableCell>R$ {c.valorSms.toFixed(2)}</TableCell>
-                <TableCell className="font-mono text-xs">{c.token}</TableCell>
+                <TableCell>R$ {Number(c.valor_sms).toFixed(4)}</TableCell>
+                <TableCell className="font-mono text-xs max-w-[120px] truncate">{c.token}</TableCell>
                 <TableCell>
-                  <button onClick={() => campanhas.update(c.id, { ativo: !c.ativo })} className="cursor-pointer">
-                    <StatusBadge ativo={c.ativo} />
+                  <button onClick={() => toggleStatus(c)} className="cursor-pointer">
+                    <StatusBadge ativo={c.status === "on"} />
                   </button>
                 </TableCell>
                 <TableCell className="text-right space-x-1">
@@ -92,7 +110,7 @@ export default function CampanhasPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Cliente</Label>
-              <Select value={String(form.clienteId)} onValueChange={(v) => setForm({ ...form, clienteId: Number(v) })}>
+              <Select value={String(form.cliente_id)} onValueChange={(v) => setForm({ ...form, cliente_id: Number(v) })}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
                 <SelectContent>
                   {clientes.items.map((c) => (
@@ -107,20 +125,20 @@ export default function CampanhasPage() {
             </div>
             <div className="space-y-2">
               <Label>Valor SMS (R$)</Label>
-              <Input type="number" step="0.01" value={form.valorSms} onChange={(e) => setForm({ ...form, valorSms: Number(e.target.value) })} />
+              <Input type="number" step="0.0001" value={form.valor_sms} onChange={(e) => setForm({ ...form, valor_sms: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Token</Label>
               <Input value={form.token} onChange={(e) => setForm({ ...form, token: e.target.value })} placeholder="Token da campanha" />
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} />
+              <Switch checked={form.status === "on"} onCheckedChange={(v) => setForm({ ...form, status: v ? "on" : "off" })} />
               <Label>Ativo</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -128,7 +146,7 @@ export default function CampanhasPage() {
       <ConfirmDelete
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
-        onConfirm={() => { if (deleteTarget) campanhas.remove(deleteTarget.id); setDeleteTarget(null); }}
+        onConfirm={async () => { if (deleteTarget) await campanhas.remove(deleteTarget.id); setDeleteTarget(null); }}
         itemName={deleteTarget?.descricao || ""}
       />
     </div>

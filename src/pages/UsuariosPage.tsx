@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useData } from "@/contexts/DataContext";
-import { Usuario } from "@/hooks/useMockData";
+import { ApiUsuario } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -10,38 +10,56 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 
 export default function UsuariosPage() {
   const { usuarios } = useData();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Usuario | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Usuario | null>(null);
+  const [editing, setEditing] = useState<ApiUsuario | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ApiUsuario | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ username: "", email: "", senha: "", ativo: true });
+  const [form, setForm] = useState({ username: "", email: "", password: "", status: "on" as "on" | "off" });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ username: "", email: "", senha: "", ativo: true });
+    setForm({ username: "", email: "", password: "", status: "on" });
     setDialogOpen(true);
   };
 
-  const openEdit = (u: Usuario) => {
+  const openEdit = (u: ApiUsuario) => {
     setEditing(u);
-    setForm({ username: u.username, email: u.email, senha: "", ativo: u.ativo });
+    setForm({ username: u.username, email: u.email, password: "", status: u.status });
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    if (editing) {
-      const data: Partial<Usuario> = { username: form.username, email: form.email, ativo: form.ativo };
-      if (form.senha) data.senha = form.senha;
-      usuarios.update(editing.id, data);
-    } else {
-      usuarios.add(form);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (editing) {
+        const data: any = { username: form.username, email: form.email, status: form.status };
+        if (form.password) data.password = form.password;
+        await usuarios.update(editing.id, data);
+      } else {
+        await usuarios.add(form);
+      }
+      setDialogOpen(false);
+    } catch {} finally {
+      setSaving(false);
     }
-    setDialogOpen(false);
   };
+
+  const toggleStatus = async (u: ApiUsuario) => {
+    await usuarios.update(u.id, { status: u.status === "on" ? "off" : "on" });
+  };
+
+  if (usuarios.loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -65,8 +83,8 @@ export default function UsuariosPage() {
                 <TableCell className="font-medium">{u.username}</TableCell>
                 <TableCell>{u.email}</TableCell>
                 <TableCell>
-                  <button onClick={() => usuarios.update(u.id, { ativo: !u.ativo })} className="cursor-pointer">
-                    <StatusBadge ativo={u.ativo} />
+                  <button onClick={() => toggleStatus(u)} className="cursor-pointer">
+                    <StatusBadge ativo={u.status === "on"} />
                   </button>
                 </TableCell>
                 <TableCell className="text-right space-x-1">
@@ -95,16 +113,16 @@ export default function UsuariosPage() {
             </div>
             <div className="space-y-2">
               <Label>{editing ? "Nova Senha (deixe vazio para manter)" : "Senha"}</Label>
-              <Input type="password" value={form.senha} onChange={(e) => setForm({ ...form, senha: e.target.value })} placeholder="••••••••" />
+              <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} />
+              <Switch checked={form.status === "on"} onCheckedChange={(v) => setForm({ ...form, status: v ? "on" : "off" })} />
               <Label>Ativo</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -112,7 +130,7 @@ export default function UsuariosPage() {
       <ConfirmDelete
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
-        onConfirm={() => { if (deleteTarget) usuarios.remove(deleteTarget.id); setDeleteTarget(null); }}
+        onConfirm={async () => { if (deleteTarget) await usuarios.remove(deleteTarget.id); setDeleteTarget(null); }}
         itemName={deleteTarget?.username || ""}
       />
     </div>

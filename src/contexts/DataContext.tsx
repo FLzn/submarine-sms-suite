@@ -1,10 +1,10 @@
 import React, { createContext, useContext } from "react";
-import { useMockData, MockData } from "@/hooks/useMockData";
+import { useApiData, ApiData } from "@/hooks/useApiData";
 
-const DataContext = createContext<MockData | null>(null);
+const DataContext = createContext<ApiData | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const data = useMockData();
+  const data = useApiData();
   return <DataContext.Provider value={data}>{children}</DataContext.Provider>;
 }
 
