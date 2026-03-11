@@ -1,25 +1,59 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { DataProvider } from "@/contexts/DataContext";
+import AppLayout from "@/components/AppLayout";
+import LoginPage from "@/pages/LoginPage";
+import ClientesPage from "@/pages/ClientesPage";
+import CampanhasPage from "@/pages/CampanhasPage";
+import OperadorasPage from "@/pages/OperadorasPage";
+import UsuariosPage from "@/pages/UsuariosPage";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function ProtectedRoutes() {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  return (
+    <DataProvider>
+      <AppLayout>
+        <Routes>
+          <Route path="/clientes" element={<ClientesPage />} />
+          <Route path="/campanhas" element={<CampanhasPage />} />
+          <Route path="/operadoras" element={<OperadorasPage />} />
+          <Route path="/usuarios" element={<UsuariosPage />} />
+          <Route path="/" element={<Navigate to="/clientes" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AppLayout>
+    </DataProvider>
+  );
+}
+
+function AppRoutes() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/*" element={<ProtectedRoutes />} />
+    </Routes>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
