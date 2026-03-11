@@ -64,7 +64,11 @@ export default function UsuariosPage() {
                 <TableCell className="font-mono text-xs text-muted-foreground">{u.id}</TableCell>
                 <TableCell className="font-medium">{u.username}</TableCell>
                 <TableCell>{u.email}</TableCell>
-                <TableCell><StatusBadge ativo={u.ativo} /></TableCell>
+                <TableCell>
+                  <button onClick={() => usuarios.update(u.id, { ativo: !u.ativo })} className="cursor-pointer">
+                    <StatusBadge ativo={u.ativo} />
+                  </button>
+                </TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(u)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(u)} className="hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
