@@ -19,7 +19,7 @@ export default function ClientesPage() {
   const [deleteTarget, setDeleteTarget] = useState<ApiCliente | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ cnpj_cpf: "", nome: "", status: "on" as "on" | "off" });
+  const [form, setForm] = useState({ cnpj_cpf: "", nome: "", code: "", status: "on" as "on" | "off" });
 
   const openCreate = () => {
     setEditing(null);
