@@ -296,7 +296,7 @@ export default function DashboardPage() {
                       <Badge
                         variant="outline"
                         className={
-                          log.status === 0
+                          log.status === 0 || (log.status_description && ["sent", "ok", "delivered", "enviado", "entregue"].includes(log.status_description.toLowerCase()))
                             ? "border-success/40 bg-success/10 text-success"
                             : "border-destructive/40 bg-destructive/10 text-destructive"
                         }
