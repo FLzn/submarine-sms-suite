@@ -23,7 +23,7 @@ export default function ClientesPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ cnpj_cpf: "", nome: "", status: "on" });
+    setForm({ cnpj_cpf: "", nome: "", code: "", status: "on" });
     setDialogOpen(true);
   };
 
