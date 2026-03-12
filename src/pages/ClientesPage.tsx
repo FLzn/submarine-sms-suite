@@ -36,10 +36,11 @@ export default function ClientesPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = { cnpj_cpf: form.cnpj_cpf, nome: form.nome, code: parseInt(form.code, 10), status: form.status };
       if (editing) {
-        await clientes.update(editing.id, form);
+        await clientes.update(editing.id, payload);
       } else {
-        await clientes.add(form);
+        await clientes.add(payload);
       }
       setDialogOpen(false);
     } catch {} finally {
