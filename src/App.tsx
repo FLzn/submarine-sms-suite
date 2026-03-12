@@ -11,6 +11,7 @@ import ClientesPage from "@/pages/ClientesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
 import OperadorasPage from "@/pages/OperadorasPage";
 import UsuariosPage from "@/pages/UsuariosPage";
+import RespostasPage from "@/pages/RespostasPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ function ProtectedRoutes() {
           <Route path="/campanhas" element={<CampanhasPage />} />
           <Route path="/operadoras" element={<OperadorasPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
+          <Route path="/respostas" element={<RespostasPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

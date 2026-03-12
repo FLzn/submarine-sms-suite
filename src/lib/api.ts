@@ -155,6 +155,38 @@ export const usuariosApi = {
   delete: (id: number) => del(`/users/${id}`),
 };
 
+// ─── SMS Replies ────────────────────────────────────
+export interface ApiSmsReply {
+  id: number;
+  sms_log_id: number | null;
+  message_id: string;
+  from_number: string;
+  message: string;
+  classify: string;
+  value: string;
+  received_at: string;
+  created_at: string;
+}
+
+export interface SmsReplyFilters {
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const smsRepliesApi = {
+  list: (filters?: SmsReplyFilters) => {
+    const params = new URLSearchParams();
+    if (filters?.startDate) params.set("startDate", filters.startDate);
+    if (filters?.endDate) params.set("endDate", filters.endDate);
+    if (filters?.page) params.set("page", String(filters.page));
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    const query = params.toString();
+    return get<PaginatedResponse<ApiSmsReply>>(`/sms-replies${query ? `?${query}` : ""}`);
+  },
+};
+
 // ─── SMS Logs ───────────────────────────────────────
 export interface SmsLogFilters {
   startDate?: string;
