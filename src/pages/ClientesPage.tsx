@@ -112,6 +112,10 @@ export default function ClientesPage() {
               <Label>Nome</Label>
               <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Nome do cliente" />
             </div>
+            <div className="space-y-2">
+              <Label>Code</Label>
+              <Input type="number" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="Ex: 1234" />
+            </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.status === "on"} onCheckedChange={(v) => setForm({ ...form, status: v ? "on" : "off" })} />
               <Label>Ativo</Label>
