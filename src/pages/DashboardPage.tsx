@@ -97,16 +97,22 @@ export default function DashboardPage() {
   }, []);
 
   const applyFilters = () => {
-    setFilters(tempFilters);
-    fetchLogs(tempFilters, 1);
-    fetchStats(tempFilters);
+    const f = buildFilters();
+    setFilters(f);
+    fetchLogs(f, 1);
+    fetchStats(f);
   };
 
   const clearFilters = () => {
     setTempFilters({});
-    setFilters({});
-    fetchLogs({}, 1);
-    fetchStats({});
+    setPeriod("hoje");
+    setCustomStart(undefined);
+    setCustomEnd(undefined);
+    const f = getDateRange("hoje");
+    const newFilters: SmsLogFilters = { startDate: f.startDate, endDate: f.endDate };
+    setFilters(newFilters);
+    fetchLogs(newFilters, 1);
+    fetchStats(newFilters);
   };
 
   const goToPage = (p: number) => {
