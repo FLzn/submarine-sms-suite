@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { smsLogsApi, ApiSmsLog, SmsLogFilters, SmsStats } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,9 +6,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Filter, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, Search, Filter, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+
+type PeriodFilter = "hoje" | "este_mes" | "mes_passado" | "outro";
+
+function getDateRange(period: PeriodFilter, customStart?: Date, customEnd?: Date) {
+  const now = new Date();
+  switch (period) {
+    case "hoje":
+      return { startDate: format(startOfDay(now), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(now), "yyyy-MM-dd'T'HH:mm:ss") };
+    case "este_mes": {
+      const s = startOfMonth(now);
+      const e = endOfMonth(now);
+      return { startDate: format(startOfDay(s), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(e), "yyyy-MM-dd'T'HH:mm:ss") };
+    }
+    case "mes_passado": {
+      const prev = subMonths(now, 1);
+      const s = startOfMonth(prev);
+      const e = endOfMonth(prev);
+      return { startDate: format(startOfDay(s), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(e), "yyyy-MM-dd'T'HH:mm:ss") };
+    }
+    case "outro":
+      return {
+        startDate: customStart ? format(startOfDay(customStart), "yyyy-MM-dd'T'HH:mm:ss") : undefined,
+        endDate: customEnd ? format(endOfDay(customEnd), "yyyy-MM-dd'T'HH:mm:ss") : undefined,
+      };
+  }
+}
 
 export default function DashboardPage() {
   const [logs, setLogs] = useState<ApiSmsLog[]>([]);
@@ -19,6 +49,12 @@ export default function DashboardPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState<SmsStats>({ total: 0, total_success: 0, total_error: 0, valor_total: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
+
+  const [period, setPeriod] = useState<PeriodFilter>("hoje");
+  const [customStart, setCustomStart] = useState<Date | undefined>();
+  const [customEnd, setCustomEnd] = useState<Date | undefined>();
+
+  const dateRange = useMemo(() => getDateRange(period, customStart, customEnd), [period, customStart, customEnd]);
 
   const fetchLogs = async (f?: SmsLogFilters, p = 1) => {
     try {
@@ -48,22 +84,35 @@ export default function DashboardPage() {
     }
   };
 
+  const buildFilters = (): SmsLogFilters => {
+    const range = getDateRange(period, customStart, customEnd);
+    return { ...tempFilters, startDate: range.startDate, endDate: range.endDate };
+  };
+
   useEffect(() => {
-    fetchLogs();
-    fetchStats();
+    const f = buildFilters();
+    setFilters(f);
+    fetchLogs(f);
+    fetchStats(f);
   }, []);
 
   const applyFilters = () => {
-    setFilters(tempFilters);
-    fetchLogs(tempFilters, 1);
-    fetchStats(tempFilters);
+    const f = buildFilters();
+    setFilters(f);
+    fetchLogs(f, 1);
+    fetchStats(f);
   };
 
   const clearFilters = () => {
     setTempFilters({});
-    setFilters({});
-    fetchLogs({}, 1);
-    fetchStats({});
+    setPeriod("hoje");
+    setCustomStart(undefined);
+    setCustomEnd(undefined);
+    const f = getDateRange("hoje");
+    const newFilters: SmsLogFilters = { startDate: f.startDate, endDate: f.endDate };
+    setFilters(newFilters);
+    fetchLogs(newFilters, 1);
+    fetchStats(newFilters);
   };
 
   const goToPage = (p: number) => {
@@ -112,23 +161,82 @@ export default function DashboardPage() {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium text-foreground">Filtros</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="space-y-1">
-            <Label className="text-xs">Data início</Label>
-            <Input
-              type="date"
-              value={tempFilters.startDate || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, startDate: e.target.value || undefined })}
-            />
+
+        {/* Period buttons */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {([
+            { value: "hoje" as PeriodFilter, label: "Hoje" },
+            { value: "este_mes" as PeriodFilter, label: "Este mês" },
+            { value: "mes_passado" as PeriodFilter, label: "Mês passado" },
+            { value: "outro" as PeriodFilter, label: "Outro período" },
+          ]).map((opt) => (
+            <Button
+              key={opt.value}
+              size="sm"
+              variant={period === opt.value ? "default" : "outline"}
+              onClick={() => setPeriod(opt.value)}
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Custom date range */}
+        {period === "outro" && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Data início</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-[180px] justify-start text-left font-normal", !customStart && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customStart ? format(customStart, "dd/MM/yyyy") : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customStart}
+                    onSelect={setCustomStart}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Data fim</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-[180px] justify-start text-left font-normal", !customEnd && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customEnd ? format(customEnd, "dd/MM/yyyy") : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customEnd}
+                    onSelect={(d) => {
+                      if (d && customStart && d < customStart) {
+                        toast.error("A data final não pode ser anterior à data inicial.");
+                        return;
+                      }
+                      setCustomEnd(d);
+                    }}
+                    disabled={(date) => customStart ? date < customStart : false}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Data fim</Label>
-            <Input
-              type="date"
-              value={tempFilters.endDate || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, endDate: e.target.value || undefined })}
-            />
-          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label className="text-xs">ID Campanha</Label>
             <Input
