@@ -11,6 +11,7 @@ const navItems = [
   { to: "/campanhas", label: "Campanhas", icon: Megaphone },
   { to: "/operadoras", label: "Operadoras", icon: Radio },
   { to: "/usuarios", label: "Usuários", icon: UserCog },
+  { to: "/respostas", label: "Respostas", icon: MessageSquareReply },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
