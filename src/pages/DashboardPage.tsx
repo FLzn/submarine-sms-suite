@@ -312,7 +312,7 @@ export default function DashboardPage() {
                 ))}
                 {logs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                       Nenhum log encontrado
                     </TableCell>
                   </TableRow>
