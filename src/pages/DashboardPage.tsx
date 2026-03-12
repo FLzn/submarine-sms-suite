@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [tempFilters, setTempFilters] = useState<SmsLogFilters>({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [stats, setStats] = useState<SmsStats>({ total: 0, total_success: 0, total_error: 0, valor_total: 0 });
+  const [stats, setStats] = useState<SmsStats>({ total: 0, total_delivered: 0, total_pending: 0, total_error: 0, valor_total: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
   const [period, setPeriod] = useState<PeriodFilter>("hoje");
@@ -128,19 +128,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">
-            {statsLoading ? "—" : stats.total.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total ?? 0).toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-muted-foreground">Total de SMS</p>
         </div>
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-success">
-            {statsLoading ? "—" : stats.total_success.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total_delivered ?? 0).toLocaleString("pt-BR")}
           </p>
-          <p className="text-sm text-muted-foreground">Enviados com sucesso</p>
+          <p className="text-sm text-muted-foreground">Entregues</p>
         </div>
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-destructive">
-            {statsLoading ? "—" : stats.total_error.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total_error ?? 0).toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-muted-foreground">Com erro</p>
         </div>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-center gap-1">
             
             <p className="text-2xl font-bold text-primary">
-              {statsLoading ? "—" : stats.valor_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {statsLoading ? "—" : (stats.valor_total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </p>
           </div>
           <p className="text-sm text-muted-foreground">Total gasto</p>

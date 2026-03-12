@@ -210,7 +210,8 @@ export interface PaginatedResponse<T> {
 
 export interface SmsStats {
   total: number;
-  total_success: number;
+  total_delivered: number;
+  total_pending: number;
   total_error: number;
   valor_total: number;
 }
