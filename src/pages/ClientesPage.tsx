@@ -19,27 +19,28 @@ export default function ClientesPage() {
   const [deleteTarget, setDeleteTarget] = useState<ApiCliente | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ cnpj_cpf: "", nome: "", status: "on" as "on" | "off" });
+  const [form, setForm] = useState({ cnpj_cpf: "", nome: "", code: "", status: "on" as "on" | "off" });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ cnpj_cpf: "", nome: "", status: "on" });
+    setForm({ cnpj_cpf: "", nome: "", code: "", status: "on" });
     setDialogOpen(true);
   };
 
   const openEdit = (c: ApiCliente) => {
     setEditing(c);
-    setForm({ cnpj_cpf: c.cnpj_cpf, nome: c.nome, status: c.status });
+    setForm({ cnpj_cpf: c.cnpj_cpf, nome: c.nome, code: String(c.code ?? ""), status: c.status });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = { cnpj_cpf: form.cnpj_cpf, nome: form.nome, code: parseInt(form.code, 10), status: form.status };
       if (editing) {
-        await clientes.update(editing.id, form);
+        await clientes.update(editing.id, payload);
       } else {
-        await clientes.add(form);
+        await clientes.add(payload);
       }
       setDialogOpen(false);
     } catch {} finally {
@@ -110,6 +111,10 @@ export default function ClientesPage() {
             <div className="space-y-2">
               <Label>Nome</Label>
               <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Nome do cliente" />
+            </div>
+            <div className="space-y-2">
+              <Label>Code</Label>
+              <Input type="number" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="Ex: 1234" />
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.status === "on"} onCheckedChange={(v) => setForm({ ...form, status: v ? "on" : "off" })} />
