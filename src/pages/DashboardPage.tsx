@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { smsLogsApi, ApiSmsLog, SmsLogFilters, SmsStats } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,9 +6,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Filter, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, Search, Filter, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+
+type PeriodFilter = "hoje" | "este_mes" | "mes_passado" | "outro";
+
+function getDateRange(period: PeriodFilter, customStart?: Date, customEnd?: Date) {
+  const now = new Date();
+  switch (period) {
+    case "hoje":
+      return { startDate: format(startOfDay(now), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(now), "yyyy-MM-dd'T'HH:mm:ss") };
+    case "este_mes": {
+      const s = startOfMonth(now);
+      const e = endOfMonth(now);
+      return { startDate: format(startOfDay(s), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(e), "yyyy-MM-dd'T'HH:mm:ss") };
+    }
+    case "mes_passado": {
+      const prev = subMonths(now, 1);
+      const s = startOfMonth(prev);
+      const e = endOfMonth(prev);
+      return { startDate: format(startOfDay(s), "yyyy-MM-dd'T'HH:mm:ss"), endDate: format(endOfDay(e), "yyyy-MM-dd'T'HH:mm:ss") };
+    }
+    case "outro":
+      return {
+        startDate: customStart ? format(startOfDay(customStart), "yyyy-MM-dd'T'HH:mm:ss") : undefined,
+        endDate: customEnd ? format(endOfDay(customEnd), "yyyy-MM-dd'T'HH:mm:ss") : undefined,
+      };
+  }
+}
 
 export default function DashboardPage() {
   const [logs, setLogs] = useState<ApiSmsLog[]>([]);
@@ -19,6 +49,12 @@ export default function DashboardPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState<SmsStats>({ total: 0, total_success: 0, total_error: 0, valor_total: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
+
+  const [period, setPeriod] = useState<PeriodFilter>("hoje");
+  const [customStart, setCustomStart] = useState<Date | undefined>();
+  const [customEnd, setCustomEnd] = useState<Date | undefined>();
+
+  const dateRange = useMemo(() => getDateRange(period, customStart, customEnd), [period, customStart, customEnd]);
 
   const fetchLogs = async (f?: SmsLogFilters, p = 1) => {
     try {
@@ -48,9 +84,16 @@ export default function DashboardPage() {
     }
   };
 
+  const buildFilters = (): SmsLogFilters => {
+    const range = getDateRange(period, customStart, customEnd);
+    return { ...tempFilters, startDate: range.startDate, endDate: range.endDate };
+  };
+
   useEffect(() => {
-    fetchLogs();
-    fetchStats();
+    const f = buildFilters();
+    setFilters(f);
+    fetchLogs(f);
+    fetchStats(f);
   }, []);
 
   const applyFilters = () => {
