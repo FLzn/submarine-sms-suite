@@ -11,6 +11,7 @@ import ClientesPage from "@/pages/ClientesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
 import OperadorasPage from "@/pages/OperadorasPage";
 import UsuariosPage from "@/pages/UsuariosPage";
+import RespostasPage from "@/pages/RespostasPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
