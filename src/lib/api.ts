@@ -161,6 +161,8 @@ export interface SmsLogFilters {
   endDate?: string;
   campanhaId?: number;
   clienteId?: number;
+  campanhaName?: string;
+  clienteName?: string;
   status?: number;
   page?: number;
   limit?: number;
