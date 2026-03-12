@@ -238,21 +238,21 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">ID Campanha</Label>
+            <Label className="text-xs">Campanha</Label>
             <Input
-              type="number"
-              placeholder="Ex: 1"
-              value={tempFilters.campanhaId || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, campanhaId: e.target.value ? Number(e.target.value) : undefined })}
+              type="text"
+              placeholder="Nome da campanha (busca parcial)"
+              value={tempFilters.campanhaName || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, campanhaName: e.target.value || undefined })}
             />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">ID Cliente</Label>
+            <Label className="text-xs">Cliente</Label>
             <Input
-              type="number"
-              placeholder="Ex: 2"
-              value={tempFilters.clienteId || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, clienteId: e.target.value ? Number(e.target.value) : undefined })}
+              type="text"
+              placeholder="Nome do cliente (busca parcial)"
+              value={tempFilters.clienteName || ""}
+              onChange={(e) => setTempFilters({ ...tempFilters, clienteName: e.target.value || undefined })}
             />
           </div>
         </div>

@@ -204,6 +204,8 @@ export const smsLogsApi = {
     if (filters?.endDate) params.set("endDate", filters.endDate);
     if (filters?.campanhaId) params.set("campanhaId", String(filters.campanhaId));
     if (filters?.clienteId) params.set("clienteId", String(filters.clienteId));
+    if (filters?.campanhaName) params.set("campanhaName", filters.campanhaName);
+    if (filters?.clienteName) params.set("clienteName", filters.clienteName);
     const query = params.toString();
     return get<SmsStats>(`/sms-logs/stats${query ? `?${query}` : ""}`);
   },
