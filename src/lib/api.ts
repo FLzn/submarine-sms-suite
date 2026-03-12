@@ -162,6 +162,23 @@ export interface SmsLogFilters {
   campanhaId?: number;
   clienteId?: number;
   status?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+export interface SmsStats {
+  total: number;
+  total_success: number;
+  total_error: number;
+  valor_total: number;
 }
 
 export const smsLogsApi = {
@@ -172,7 +189,18 @@ export const smsLogsApi = {
     if (filters?.campanhaId) params.set("campanhaId", String(filters.campanhaId));
     if (filters?.clienteId) params.set("clienteId", String(filters.clienteId));
     if (filters?.status !== undefined) params.set("status", String(filters.status));
+    if (filters?.page) params.set("page", String(filters.page));
+    if (filters?.limit) params.set("limit", String(filters.limit));
     const query = params.toString();
-    return get<ApiSmsLog[]>(`/sms-logs${query ? `?${query}` : ""}`);
+    return get<PaginatedResponse<ApiSmsLog>>(`/sms-logs${query ? `?${query}` : ""}`);
+  },
+  stats: (filters?: Omit<SmsLogFilters, "status" | "page" | "limit">) => {
+    const params = new URLSearchParams();
+    if (filters?.startDate) params.set("startDate", filters.startDate);
+    if (filters?.endDate) params.set("endDate", filters.endDate);
+    if (filters?.campanhaId) params.set("campanhaId", String(filters.campanhaId));
+    if (filters?.clienteId) params.set("clienteId", String(filters.clienteId));
+    const query = params.toString();
+    return get<SmsStats>(`/sms-logs/stats${query ? `?${query}` : ""}`);
   },
 };
