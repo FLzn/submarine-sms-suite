@@ -97,7 +97,7 @@ export default function DashboardPage() {
         </div>
         <div className="glass-card p-4 text-center">
           <div className="flex items-center justify-center gap-1">
-            <DollarSign className="w-5 h-5 text-primary" />
+            
             <p className="text-2xl font-bold text-primary">
               {statsLoading ? "—" : stats.valor_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </p>
