@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [tempFilters, setTempFilters] = useState<SmsLogFilters>({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [stats, setStats] = useState<SmsStats>({ total: 0, total_success: 0, total_error: 0, valor_total: 0 } as SmsStats);
+  const [stats, setStats] = useState<SmsStats>({ total: 0, total_delivered: 0, total_pending: 0, total_error: 0, valor_total: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
   const [period, setPeriod] = useState<PeriodFilter>("hoje");
