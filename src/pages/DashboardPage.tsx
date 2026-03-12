@@ -278,23 +278,20 @@ export default function DashboardPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-border/50 hover:bg-transparent">
-                  <TableHead className="text-muted-foreground">ID</TableHead>
-                  <TableHead className="text-muted-foreground">Campanha</TableHead>
-                  <TableHead className="text-muted-foreground">Cliente</TableHead>
-                  <TableHead className="text-muted-foreground">Telefone</TableHead>
-                  <TableHead className="text-muted-foreground">Mensagem</TableHead>
+                  <TableHead className="text-muted-foreground">Data/Hora</TableHead>
                   <TableHead className="text-muted-foreground">Status</TableHead>
-                  <TableHead className="text-muted-foreground">Enviado em</TableHead>
+                  <TableHead className="text-muted-foreground">Telefone</TableHead>
+                  <TableHead className="text-muted-foreground">Cliente</TableHead>
+                  <TableHead className="text-muted-foreground">Campanha</TableHead>
+                  <TableHead className="text-muted-foreground">Mensagem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {logs.map((log) => (
                   <TableRow key={log.id} className="border-border/30">
-                    <TableCell className="font-mono text-xs text-muted-foreground">{log.id}</TableCell>
-                    <TableCell>{log.campanha?.descricao || "—"}</TableCell>
-                    <TableCell>{log.campanha?.cliente?.nome || "—"}</TableCell>
-                    <TableCell className="font-mono text-xs">{log.phone_number}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{log.message}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {log.sent_at ? format(new Date(log.sent_at), "dd/MM/yyyy HH:mm") : "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -307,14 +304,15 @@ export default function DashboardPage() {
                         {log.status === 0 ? "Ok" : log.status_description || `Erro ${log.status}`}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {log.sent_at ? format(new Date(log.sent_at), "dd/MM/yyyy HH:mm") : "—"}
-                    </TableCell>
+                    <TableCell className="font-mono text-xs">{log.phone_number}</TableCell>
+                    <TableCell>{log.campanha?.cliente?.nome || "—"}</TableCell>
+                    <TableCell>{log.campanha?.descricao || "—"}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{log.message}</TableCell>
                   </TableRow>
                 ))}
                 {logs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                       Nenhum log encontrado
                     </TableCell>
                   </TableRow>
