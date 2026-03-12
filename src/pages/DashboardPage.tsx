@@ -140,7 +140,7 @@ export default function DashboardPage() {
         </div>
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-destructive">
-            {statsLoading ? "—" : stats.total_error.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total_error ?? 0).toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-muted-foreground">Com erro</p>
         </div>
