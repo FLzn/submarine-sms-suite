@@ -161,6 +161,8 @@ export interface SmsLogFilters {
   endDate?: string;
   campanhaId?: number;
   clienteId?: number;
+  campanhaName?: string;
+  clienteName?: string;
   status?: number;
   page?: number;
   limit?: number;
@@ -188,6 +190,8 @@ export const smsLogsApi = {
     if (filters?.endDate) params.set("endDate", filters.endDate);
     if (filters?.campanhaId) params.set("campanhaId", String(filters.campanhaId));
     if (filters?.clienteId) params.set("clienteId", String(filters.clienteId));
+    if (filters?.campanhaName) params.set("campanhaName", filters.campanhaName);
+    if (filters?.clienteName) params.set("clienteName", filters.clienteName);
     if (filters?.status !== undefined) params.set("status", String(filters.status));
     if (filters?.page) params.set("page", String(filters.page));
     if (filters?.limit) params.set("limit", String(filters.limit));
@@ -200,6 +204,8 @@ export const smsLogsApi = {
     if (filters?.endDate) params.set("endDate", filters.endDate);
     if (filters?.campanhaId) params.set("campanhaId", String(filters.campanhaId));
     if (filters?.clienteId) params.set("clienteId", String(filters.clienteId));
+    if (filters?.campanhaName) params.set("campanhaName", filters.campanhaName);
+    if (filters?.clienteName) params.set("clienteName", filters.clienteName);
     const query = params.toString();
     return get<SmsStats>(`/sms-logs/stats${query ? `?${query}` : ""}`);
   },
