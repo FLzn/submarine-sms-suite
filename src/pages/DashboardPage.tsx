@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { smsLogsApi, ApiSmsLog, SmsLogFilters } from "@/lib/api";
+import { smsLogsApi, ApiSmsLog, SmsLogFilters, SmsStats } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Search, Filter, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -15,12 +15,19 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<SmsLogFilters>({});
   const [tempFilters, setTempFilters] = useState<SmsLogFilters>({});
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState<SmsStats>({ total: 0, total_success: 0, total_error: 0, valor_total: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
 
-  const fetchLogs = async (f?: SmsLogFilters) => {
+  const fetchLogs = async (f?: SmsLogFilters, p = 1) => {
     try {
       setLoading(true);
-      const data = await smsLogsApi.list(f || filters);
-      setLogs(data);
+      const activeFilters = f ?? filters;
+      const res = await smsLogsApi.list({ ...activeFilters, page: p, limit: 50 });
+      setLogs(res.data);
+      setPage(res.page);
+      setTotalPages(res.pages);
     } catch (err: any) {
       toast.error("Erro ao carregar logs: " + err.message);
     } finally {
@@ -28,41 +35,74 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchStats = async (f?: SmsLogFilters) => {
+    try {
+      setStatsLoading(true);
+      const activeFilters = f ?? filters;
+      const data = await smsLogsApi.stats(activeFilters);
+      setStats(data);
+    } catch (err: any) {
+      toast.error("Erro ao carregar estatísticas: " + err.message);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
+    fetchStats();
   }, []);
 
   const applyFilters = () => {
     setFilters(tempFilters);
-    fetchLogs(tempFilters);
+    fetchLogs(tempFilters, 1);
+    fetchStats(tempFilters);
   };
 
   const clearFilters = () => {
     setTempFilters({});
     setFilters({});
-    fetchLogs({});
+    fetchLogs({}, 1);
+    fetchStats({});
   };
 
-  const successCount = logs.filter((l) => l.status === 0).length;
-  const errorCount = logs.filter((l) => l.status !== 0).length;
+  const goToPage = (p: number) => {
+    if (p < 1 || p > totalPages) return;
+    fetchLogs(filters, p);
+  };
 
   return (
     <div>
       <PageHeader title="Dashboard" description="Logs de envio de SMS" />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{logs.length}</p>
+          <p className="text-2xl font-bold text-foreground">
+            {statsLoading ? "—" : stats.total.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-muted-foreground">Total de SMS</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <p className="text-2xl font-bold text-success">{successCount}</p>
+          <p className="text-2xl font-bold text-success">
+            {statsLoading ? "—" : stats.total_success.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-muted-foreground">Enviados com sucesso</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <p className="text-2xl font-bold text-destructive">{errorCount}</p>
+          <p className="text-2xl font-bold text-destructive">
+            {statsLoading ? "—" : stats.total_error.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-muted-foreground">Com erro</p>
+        </div>
+        <div className="glass-card p-4 text-center">
+          <div className="flex items-center justify-center gap-1">
+            <DollarSign className="w-5 h-5 text-primary" />
+            <p className="text-2xl font-bold text-primary">
+              {statsLoading ? "—" : stats.valor_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground">Total gasto</p>
         </div>
       </div>
 
@@ -123,52 +163,71 @@ export default function DashboardPage() {
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/50 hover:bg-transparent">
-                <TableHead className="text-muted-foreground">ID</TableHead>
-                <TableHead className="text-muted-foreground">Campanha</TableHead>
-                <TableHead className="text-muted-foreground">Cliente</TableHead>
-                <TableHead className="text-muted-foreground">Telefone</TableHead>
-                <TableHead className="text-muted-foreground">Mensagem</TableHead>
-                <TableHead className="text-muted-foreground">Status</TableHead>
-                <TableHead className="text-muted-foreground">Enviado em</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.map((log) => (
-                <TableRow key={log.id} className="border-border/30">
-                  <TableCell className="font-mono text-xs text-muted-foreground">{log.id}</TableCell>
-                  <TableCell>{log.campanha?.descricao || "—"}</TableCell>
-                  <TableCell>{log.campanha?.cliente?.nome || "—"}</TableCell>
-                  <TableCell className="font-mono text-xs">{log.phone_number}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{log.message}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        log.status === 0
-                          ? "border-success/40 bg-success/10 text-success"
-                          : "border-destructive/40 bg-destructive/10 text-destructive"
-                      }
-                    >
-                      {log.status === 0 ? "Ok" : log.status_description || `Erro ${log.status}`}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {log.sent_at ? format(new Date(log.sent_at), "dd/MM/yyyy HH:mm") : "—"}
-                  </TableCell>
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-border/50 hover:bg-transparent">
+                  <TableHead className="text-muted-foreground">ID</TableHead>
+                  <TableHead className="text-muted-foreground">Campanha</TableHead>
+                  <TableHead className="text-muted-foreground">Cliente</TableHead>
+                  <TableHead className="text-muted-foreground">Telefone</TableHead>
+                  <TableHead className="text-muted-foreground">Mensagem</TableHead>
+                  <TableHead className="text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-muted-foreground">Enviado em</TableHead>
                 </TableRow>
-              ))}
-              {logs.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                    Nenhum log encontrado
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow key={log.id} className="border-border/30">
+                    <TableCell className="font-mono text-xs text-muted-foreground">{log.id}</TableCell>
+                    <TableCell>{log.campanha?.descricao || "—"}</TableCell>
+                    <TableCell>{log.campanha?.cliente?.nome || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">{log.phone_number}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{log.message}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          log.status === 0
+                            ? "border-success/40 bg-success/10 text-success"
+                            : "border-destructive/40 bg-destructive/10 text-destructive"
+                        }
+                      >
+                        {log.status === 0 ? "Ok" : log.status_description || `Erro ${log.status}`}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {log.sent_at ? format(new Date(log.sent_at), "dd/MM/yyyy HH:mm") : "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {logs.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                      Nenhum log encontrado
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border/30">
+                <p className="text-sm text-muted-foreground">
+                  Página {page} de {totalPages}
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => goToPage(page - 1)} disabled={page <= 1}>
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => goToPage(page + 1)} disabled={page >= totalPages}>
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
