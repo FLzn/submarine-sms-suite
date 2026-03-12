@@ -134,9 +134,9 @@ export default function DashboardPage() {
         </div>
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-success">
-            {statsLoading ? "—" : stats.total_success.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total_delivered ?? 0).toLocaleString("pt-BR")}
           </p>
-          <p className="text-sm text-muted-foreground">Enviados com sucesso</p>
+          <p className="text-sm text-muted-foreground">Entregues</p>
         </div>
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-destructive">
