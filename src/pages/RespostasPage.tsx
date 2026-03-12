@@ -64,7 +64,13 @@ export default function RespostasPage() {
       setPage(res.page);
       setTotalPages(res.pages);
     } catch (err: any) {
-      toast.error("Erro ao carregar respostas: " + err.message);
+      setReplies([]);
+      setTotalPages(1);
+      setPage(1);
+      // Only show toast for non-404 errors (endpoint may not be deployed yet)
+      if (!err.message?.includes("404") && !err.message?.includes("Not Found")) {
+        toast.error("Erro ao carregar respostas: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
