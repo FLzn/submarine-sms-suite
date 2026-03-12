@@ -128,7 +128,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">
-            {statsLoading ? "—" : stats.total.toLocaleString("pt-BR")}
+            {statsLoading ? "—" : (stats.total ?? 0).toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-muted-foreground">Total de SMS</p>
         </div>
