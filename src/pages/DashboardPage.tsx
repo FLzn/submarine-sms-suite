@@ -161,23 +161,82 @@ export default function DashboardPage() {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium text-foreground">Filtros</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="space-y-1">
-            <Label className="text-xs">Data início</Label>
-            <Input
-              type="date"
-              value={tempFilters.startDate || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, startDate: e.target.value || undefined })}
-            />
+
+        {/* Period buttons */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {([
+            { value: "hoje" as PeriodFilter, label: "Hoje" },
+            { value: "este_mes" as PeriodFilter, label: "Este mês" },
+            { value: "mes_passado" as PeriodFilter, label: "Mês passado" },
+            { value: "outro" as PeriodFilter, label: "Outro período" },
+          ]).map((opt) => (
+            <Button
+              key={opt.value}
+              size="sm"
+              variant={period === opt.value ? "default" : "outline"}
+              onClick={() => setPeriod(opt.value)}
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Custom date range */}
+        {period === "outro" && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Data início</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-[180px] justify-start text-left font-normal", !customStart && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customStart ? format(customStart, "dd/MM/yyyy") : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customStart}
+                    onSelect={setCustomStart}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Data fim</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-[180px] justify-start text-left font-normal", !customEnd && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customEnd ? format(customEnd, "dd/MM/yyyy") : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customEnd}
+                    onSelect={(d) => {
+                      if (d && customStart && d < customStart) {
+                        toast.error("A data final não pode ser anterior à data inicial.");
+                        return;
+                      }
+                      setCustomEnd(d);
+                    }}
+                    disabled={(date) => customStart ? date < customStart : false}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Data fim</Label>
-            <Input
-              type="date"
-              value={tempFilters.endDate || ""}
-              onChange={(e) => setTempFilters({ ...tempFilters, endDate: e.target.value || undefined })}
-            />
-          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label className="text-xs">ID Campanha</Label>
             <Input
