@@ -296,9 +296,11 @@ export default function DashboardPage() {
                       <Badge
                         variant="outline"
                         className={
-                          log.status === 0 || (log.status_description && ["sent", "ok", "delivered", "enviado", "entregue"].includes(log.status_description.toLowerCase()))
-                            ? "border-success/40 bg-success/10 text-success"
-                            : "border-destructive/40 bg-destructive/10 text-destructive"
+                          log.status === 0
+                            ? "border-border bg-muted/30 text-muted-foreground"
+                            : (log.status_description && ["sent", "delivered", "enviado", "entregue"].includes(log.status_description.toLowerCase()))
+                              ? "border-success/40 bg-success/10 text-success"
+                              : "border-destructive/40 bg-destructive/10 text-destructive"
                         }
                       >
                         {log.status === 0 ? "Ok" : log.status_description || `Erro ${log.status}`}
