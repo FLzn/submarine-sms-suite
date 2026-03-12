@@ -65,6 +65,9 @@ export default function DashboardPage() {
       setPage(res.page);
       setTotalPages(res.pages);
     } catch (err: any) {
+      setLogs([]);
+      setTotalPages(1);
+      setPage(1);
       toast.error("Erro ao carregar logs: " + err.message);
     } finally {
       setLoading(false);
