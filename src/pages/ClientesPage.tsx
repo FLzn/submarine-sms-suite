@@ -29,7 +29,7 @@ export default function ClientesPage() {
 
   const openEdit = (c: ApiCliente) => {
     setEditing(c);
-    setForm({ cnpj_cpf: c.cnpj_cpf, nome: c.nome, status: c.status });
+    setForm({ cnpj_cpf: c.cnpj_cpf, nome: c.nome, code: String(c.code ?? ""), status: c.status });
     setDialogOpen(true);
   };
 
