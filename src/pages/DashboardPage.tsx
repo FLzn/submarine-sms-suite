@@ -148,7 +148,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-center gap-1">
             
             <p className="text-2xl font-bold text-primary">
-              {statsLoading ? "—" : stats.valor_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {statsLoading ? "—" : (stats.valor_total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </p>
           </div>
           <p className="text-sm text-muted-foreground">Total gasto</p>
