@@ -1,6 +1,6 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X, LayoutDashboard, MessageSquareReply } from "lucide-react";
+import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X, LayoutDashboard, MessageSquareReply, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/operadoras", label: "Operadoras", icon: Radio },
   { to: "/usuarios", label: "Usuários", icon: UserCog },
   { to: "/respostas", label: "Respostas", icon: MessageSquareReply },
+  { to: "/preferencias", label: "Preferências", icon: Settings },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
