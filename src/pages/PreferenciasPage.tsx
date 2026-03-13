@@ -34,6 +34,7 @@ export default function PreferenciasPage() {
     }
 
     setSaving(true);
+    setSaveStatus("idle");
     try {
       const data = await preferenciasApi.update({
         cleanup_enabled: cleanupEnabled,
@@ -41,9 +42,13 @@ export default function PreferenciasPage() {
       });
       setCleanupEnabled(data.cleanup_enabled);
       setIntervalMonths(data.cleanup_interval_months);
+      setSaveStatus("success");
       toast({ title: "Preferências salvas com sucesso" });
+      setTimeout(() => setSaveStatus("idle"), 4000);
     } catch {
+      setSaveStatus("error");
       toast({ title: "Erro ao salvar preferências", variant: "destructive" });
+      setTimeout(() => setSaveStatus("idle"), 4000);
     } finally {
       setSaving(false);
     }
