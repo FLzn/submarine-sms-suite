@@ -1,6 +1,6 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X, LayoutDashboard, MessageSquareReply } from "lucide-react";
+import { Anchor, Users, Megaphone, Radio, UserCog, LogOut, Menu, X, LayoutDashboard, MessageSquareReply, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
