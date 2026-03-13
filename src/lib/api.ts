@@ -187,6 +187,20 @@ export const smsRepliesApi = {
   },
 };
 
+// ─── Preferências ───────────────────────────────────
+export interface ApiPreferencias {
+  id: number;
+  cleanup_enabled: boolean;
+  cleanup_interval_months: number;
+  updated_at: string;
+}
+
+export const preferenciasApi = {
+  get: () => get<ApiPreferencias>("/preferencias"),
+  update: (data: Partial<Pick<ApiPreferencias, "cleanup_enabled" | "cleanup_interval_months">>) =>
+    put<ApiPreferencias>("/preferencias", data),
+};
+
 // ─── SMS Logs ───────────────────────────────────────
 export interface SmsLogFilters {
   startDate?: string;
