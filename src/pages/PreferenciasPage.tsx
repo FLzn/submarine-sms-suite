@@ -116,14 +116,30 @@ export default function PreferenciasPage() {
             </div>
           )}
 
-          <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
-            {saving ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
+              {saving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              Salvar
+            </Button>
+
+            {saveStatus === "success" && (
+              <span className="flex items-center gap-1.5 text-sm text-success animate-in fade-in slide-in-from-left-2 duration-300">
+                <CheckCircle2 className="w-4 h-4" />
+                Salvo com sucesso
+              </span>
             )}
-            Salvar
-          </Button>
+
+            {saveStatus === "error" && (
+              <span className="flex items-center gap-1.5 text-sm text-destructive animate-in fade-in slide-in-from-left-2 duration-300">
+                <XCircle className="w-4 h-4" />
+                Falha ao salvar
+              </span>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
