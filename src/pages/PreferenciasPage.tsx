@@ -13,6 +13,7 @@ export default function PreferenciasPage() {
   const [saving, setSaving] = useState(false);
   const [cleanupEnabled, setCleanupEnabled] = useState(false);
   const [intervalMonths, setIntervalMonths] = useState(3);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
 
   useEffect(() => {
     preferenciasApi.get()
