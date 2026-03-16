@@ -201,6 +201,7 @@ export default function RelatoriosPage() {
                   <XAxis dataKey="label" tick={{ fill: "hsl(215 15% 55%)", fontSize: 12 }} />
                   <YAxis tick={{ fill: "hsl(215 15% 55%)", fontSize: 12 }} />
                   <Tooltip
+                    labelFormatter={(value) => value}
                     contentStyle={{
                       backgroundColor: "hsl(215 25% 13%)",
                       border: "1px solid hsl(215 20% 20%)",
