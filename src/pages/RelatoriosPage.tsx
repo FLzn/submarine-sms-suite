@@ -55,6 +55,10 @@ export default function RelatoriosPage() {
 
   const handleDownloadPdf = async () => {
     if (!startDate || !endDate) return;
+    if (startDate > endDate) {
+      toast.error("A data inicial não pode ser maior que a data final.");
+      return;
+    }
     try {
       setPdfLoading(true);
       await relatoriosApi.downloadPdf(
@@ -96,7 +100,10 @@ export default function RelatoriosPage() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
+                <Calendar mode="single" selected={startDate} onSelect={(d) => {
+                    setStartDate(d);
+                    if (d && endDate && d > endDate) setEndDate(undefined);
+                  }} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
           </div>
