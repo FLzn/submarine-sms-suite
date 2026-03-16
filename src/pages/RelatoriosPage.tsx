@@ -70,11 +70,12 @@ export default function RelatoriosPage() {
   };
 
   const chartData = data?.evolucao_diaria.map((d) => {
-    const parsed = new Date(d.data + "T12:00:00");
+    const dateStr = d.data.includes("T") ? d.data.split("T")[0] : d.data;
+    const parsed = new Date(dateStr + "T12:00:00");
     const isValid = !isNaN(parsed.getTime());
     return {
       ...d,
-      label: isValid ? format(parsed, "dd/MM", { locale: ptBR }) : d.data,
+      label: isValid ? format(parsed, "dd/MM/yyyy", { locale: ptBR }) : dateStr,
     };
   });
 
