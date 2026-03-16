@@ -55,6 +55,10 @@ export default function RelatoriosPage() {
 
   const handleDownloadPdf = async () => {
     if (!startDate || !endDate) return;
+    if (startDate > endDate) {
+      toast.error("A data inicial não pode ser maior que a data final.");
+      return;
+    }
     try {
       setPdfLoading(true);
       await relatoriosApi.downloadPdf(
