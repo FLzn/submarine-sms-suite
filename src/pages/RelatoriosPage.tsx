@@ -69,10 +69,14 @@ export default function RelatoriosPage() {
     }
   };
 
-  const chartData = data?.evolucao_diaria.map((d) => ({
-    ...d,
-    label: format(new Date(d.data + "T12:00:00"), "dd/MM", { locale: ptBR }),
-  }));
+  const chartData = data?.evolucao_diaria.map((d) => {
+    const parsed = new Date(d.data + "T12:00:00");
+    const isValid = !isNaN(parsed.getTime());
+    return {
+      ...d,
+      label: isValid ? format(parsed, "dd/MM", { locale: ptBR }) : d.data,
+    };
+  });
 
   return (
     <div>
