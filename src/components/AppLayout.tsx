@@ -12,6 +12,7 @@ const navItems = [
   { to: "/operadoras", label: "Operadoras", icon: Radio },
   { to: "/usuarios", label: "Usuários", icon: UserCog },
   { to: "/respostas", label: "Respostas", icon: MessageSquareReply },
+  { to: "/relatorios", label: "Relatórios", icon: FileBarChart },
   { to: "/preferencias", label: "Preferências", icon: Settings },
 ];
 
