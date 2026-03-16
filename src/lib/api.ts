@@ -257,3 +257,58 @@ export const smsLogsApi = {
     return get<SmsStats>(`/sms-logs/stats${query ? `?${query}` : ""}`);
   },
 };
+
+// ─── Relatórios ─────────────────────────────────────
+export interface RelatorioTotais {
+  total: number;
+  total_delivered: number;
+  total_pending: number;
+  total_error: number;
+  valor_total: number;
+  taxa_entrega: number;
+}
+
+export interface RelatorioPorCliente {
+  cliente_id: number;
+  cliente_nome: string;
+  total: number;
+  total_delivered: number;
+  total_pending: number;
+  total_error: number;
+  valor_total: number;
+  taxa_entrega: number;
+}
+
+export interface RelatorioEvolucaoDiaria {
+  data: string;
+  total: number;
+  total_delivered: number;
+  total_error: number;
+}
+
+export interface RelatorioSms {
+  periodo: { start: string; end: string };
+  totais: RelatorioTotais;
+  por_cliente: RelatorioPorCliente[];
+  evolucao_diaria: RelatorioEvolucaoDiaria[];
+}
+
+export const relatoriosApi = {
+  get: (startDate: string, endDate: string) =>
+    get<RelatorioSms>(`/relatorios/sms?startDate=${startDate}&endDate=${endDate}`),
+  downloadPdf: async (startDate: string, endDate: string) => {
+    const token = getToken();
+    const res = await fetch(
+      `${BASE_URL}/relatorios/sms/pdf?startDate=${startDate}&endDate=${endDate}`,
+      { headers: authHeaders(token) }
+    );
+    if (!res.ok) throw new Error(`Erro ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-sms-${startDate}-${endDate}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+};

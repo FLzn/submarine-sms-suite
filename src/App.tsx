@@ -12,6 +12,7 @@ import CampanhasPage from "@/pages/CampanhasPage";
 import OperadorasPage from "@/pages/OperadorasPage";
 import UsuariosPage from "@/pages/UsuariosPage";
 import RespostasPage from "@/pages/RespostasPage";
+import RelatoriosPage from "@/pages/RelatoriosPage";
 import PreferenciasPage from "@/pages/PreferenciasPage";
 import NotFound from "@/pages/NotFound";
 
@@ -31,6 +32,7 @@ function ProtectedRoutes() {
           <Route path="/operadoras" element={<OperadorasPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
           <Route path="/respostas" element={<RespostasPage />} />
+          <Route path="/relatorios" element={<RelatoriosPage />} />
           <Route path="/preferencias" element={<PreferenciasPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
