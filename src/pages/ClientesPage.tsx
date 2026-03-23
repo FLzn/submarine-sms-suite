@@ -123,7 +123,7 @@ export default function ClientesPage() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
+            <Button onClick={handleSave} disabled={saving || !form.nome.trim() || !form.cnpj_cpf.trim() || !(parseInt(form.code, 10) >= 1)}>{saving ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

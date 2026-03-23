@@ -96,7 +96,7 @@ export default function PreferenciasPage() {
               <Input
                 id="interval-months"
                 type="number"
-                min={1}
+                min={0}
                 step={1}
                 value={intervalMonths}
                 onChange={(e) => setIntervalMonths(Math.max(1, parseInt(e.target.value) || 1))}

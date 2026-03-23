@@ -1,4 +1,4 @@
-const BASE_URL = "https://unhaunted-jene-stanchlessly.ngrok-free.dev";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const defaultHeaders: Record<string, string> = {
   "Content-Type": "application/json",

@@ -39,10 +39,11 @@ export default function CampanhasPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = { ...form, valor_sms: Number(form.valor_sms) } as any;
       if (editing) {
-        await campanhas.update(editing.id, form);
+        await campanhas.update(editing.id, payload);
       } else {
-        await campanhas.add(form);
+        await campanhas.add(payload);
       }
       setDialogOpen(false);
     } catch {} finally {
@@ -138,7 +139,7 @@ export default function CampanhasPage() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
+            <Button onClick={handleSave} disabled={saving || !form.descricao.trim() || !form.token.trim() || !(Number(form.valor_sms) > 0) || !form.cliente_id}>{saving ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
