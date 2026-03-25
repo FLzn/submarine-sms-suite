@@ -228,6 +228,8 @@ export interface SmsStats {
   total_pending: number;
   total_error: number;
   valor_total: number;
+  total_replies: number;
+  valor_total_replies: number;
 }
 
 export const smsLogsApi = {

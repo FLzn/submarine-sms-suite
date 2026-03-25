@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [tempFilters, setTempFilters] = useState<SmsLogFilters>({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [stats, setStats] = useState<SmsStats>({ total: 0, total_delivered: 0, total_pending: 0, total_error: 0, valor_total: 0 });
+  const [stats, setStats] = useState<SmsStats>({ total: 0, total_delivered: 0, total_pending: 0, total_error: 0, valor_total: 0, total_replies: 0, valor_total_replies: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
   const [period, setPeriod] = useState<PeriodFilter>("hoje");
@@ -128,7 +128,7 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard" description="Logs de envio de SMS" />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div className="glass-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">
             {statsLoading ? "—" : (stats.total ?? 0).toLocaleString("pt-BR")}
@@ -148,12 +148,15 @@ export default function DashboardPage() {
           <p className="text-sm text-muted-foreground">Com erro</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <div className="flex items-center justify-center gap-1">
-            
-            <p className="text-2xl font-bold text-primary">
-              {statsLoading ? "—" : (stats.valor_total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-            </p>
-          </div>
+          <p className="text-2xl font-bold text-foreground">
+            {statsLoading ? "—" : (stats.total_replies ?? 0).toLocaleString("pt-BR")}
+          </p>
+          <p className="text-sm text-muted-foreground">Respostas</p>
+        </div>
+        <div className="glass-card p-4 text-center">
+          <p className="text-2xl font-bold text-primary">
+            {statsLoading ? "—" : ((stats.valor_total ?? 0) + (stats.valor_total_replies ?? 0)).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          </p>
           <p className="text-sm text-muted-foreground">Total gasto</p>
         </div>
       </div>
