@@ -166,6 +166,14 @@ export interface ApiSmsReply {
   value: string;
   received_at: string;
   created_at: string;
+  sms_log?: {
+    message: string;
+    phone_number: string;
+    campanha?: {
+      descricao: string;
+      cliente?: { nome: string };
+    };
+  } | null;
 }
 
 export interface SmsReplyFilters {

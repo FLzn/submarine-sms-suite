@@ -199,7 +199,9 @@ export default function RespostasPage() {
               <TableHeader>
                 <TableRow className="border-border/50 hover:bg-transparent">
                   <TableHead className="text-muted-foreground">De</TableHead>
-                  <TableHead className="text-muted-foreground">Mensagem</TableHead>
+                  <TableHead className="text-muted-foreground">Resposta</TableHead>
+                  <TableHead className="text-muted-foreground">Mensagem original</TableHead>
+                  <TableHead className="text-muted-foreground">Campanha</TableHead>
                   <TableHead className="text-muted-foreground">Classificação</TableHead>
                   <TableHead className="text-muted-foreground">Recebido em</TableHead>
                 </TableRow>
@@ -208,7 +210,15 @@ export default function RespostasPage() {
                 {replies.map((r) => (
                   <TableRow key={r.id} className="border-border/30">
                     <TableCell className="font-mono text-xs">{r.from_number}</TableCell>
-                    <TableCell className="max-w-[300px]">{r.message}</TableCell>
+                    <TableCell className="max-w-[200px]">{r.message}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-muted-foreground text-xs">
+                      {r.sms_log?.message ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {r.sms_log?.campanha
+                        ? `${r.sms_log.campanha.cliente?.nome ?? "—"} / ${r.sms_log.campanha.descricao}`
+                        : "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary">
                         {r.classify}
@@ -221,7 +231,7 @@ export default function RespostasPage() {
                 ))}
                 {replies.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                       Nenhuma resposta encontrada
                     </TableCell>
                   </TableRow>
